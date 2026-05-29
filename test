@@ -49,7 +49,7 @@ task.spawn(function()
         end
     end
 end)
--- === MINIMAL BYPASS (Ít conflict nhất) ===
+-- === BYPASS FIXED - Không auto close UI ===
 task.spawn(function()
     local waited = 0
     while not Junkie and waited < 350 do
@@ -61,26 +61,20 @@ task.spawn(function()
         return 
     end
 
-    print("✅ Junkie loaded - Minimal bypass")
+    print("✅ Junkie loaded - Fixed Bypass")
 
-    -- Chỉ hookfunction đơn giản
-    pcall(function()
-        hookfunction(Junkie.check_key, function(key)
-            print("check_key called:", key)
-            return { valid = true }
-        end)
-    end)
-
-    -- Fake HWID nhẹ
-    pcall(function()
-        if gethwid then
-            hookfunction(gethwid, function()
-                return "BYPASSED-HWID-" .. math.random(100000,999999)
-            end)
+    hookfunction(Junkie.check_key, function(key)
+        print("check_key called with:", key)
+        
+        if key == "KEYLESS" then
+            return { valid = false }   -- Không cho keyless tự pass
         end
+        
+        -- Fake khi bấm Redeem
+        return { valid = true }
     end)
 
-    print("✅ Minimal bypass applied")
+    print("✅ Bypass applied - UI sẽ hiện, bấm Redeem đi")
 end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
