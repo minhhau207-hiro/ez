@@ -52,37 +52,37 @@ task.spawn(function()
         end
     end
 end)
--- === BYPASS MOON HUB - STABLE (Không freeze) ===
+-- === BYPASS MOON HUB - FIXED (Không tự đóng UI) ===
 task.spawn(function()
     local waited = 0
     while not Junkie and waited < 250 do
         task.wait(0.03)
         waited += 1
     end
-    
     if not Junkie then 
         warn("❌ Junkie not loaded") 
         return 
     end
 
-    print("✅ Junkie loaded - Applying stable hook")
+    print("✅ Junkie loaded - Waiting for keyless check...")
 
-    -- Hook đơn giản + an toàn nhất
-    pcall(function()
-        hookfunction(Junkie.check_key, function(key)
-            print("🔥 check_key called with:", key)
-            return { valid = true }
-        end)
+    -- Đợi Keyless check xong trước
+    task.wait(1.2)
+
+    print("🔥 Applying hook now")
+
+    hookfunction(Junkie.check_key, function(key)
+        print("🔥 check_key called with:", key)
+        
+        -- Chỉ fake khi người dùng bấm Redeem hoặc nhập key
+        if key == "KEYLESS" then
+            return { valid = false }  -- Không cho keyless
+        end
+        
+        return { valid = true }
     end)
 
-    -- Backup: fake cả get_key_link nếu cần
-    pcall(function()
-        hookfunction(Junkie.get_key_link, function()
-            return "https://floodline.store/product/moon-hub"
-        end)
-    end)
-
-    print("✅ Bypass applied - Try redeem key now")
+    print("✅ Hook applied - Now press Redeem button")
 end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
