@@ -1,39 +1,5 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
--- === ANTI KICK ULTRA + SAFE PCALL ===
-print("✅ Loading Safe Anti-Kick...")
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-
-
--- Hookmetamethod Namecall
-pcall(function()
-    local oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        if method == "Kick" and (self == LocalPlayer or self == Players) then
-            local reason = ...
-            warn("[ANTI-KICK] Blocked namecall:", reason or "Unknown")
-            return nil
-        end
-        return oldNamecall(self, ...)
-    end)
-end)
-
-
-pcall(function()
-    for _, conn in pairs(getconnections(LocalPlayer.AncestryChanged)) do
-        conn:Disable()
-    end
-end)
-
-pcall(function()
-    for _, conn in pairs(getconnections(game.Logout)) do
-        conn:Disable()
-    end
-end)
-
-print("✅ Safe Anti-Kick loaded successfully")
 -- SETTINGS
 local Options = {
     Draggable      = true,
@@ -74,42 +40,41 @@ task.spawn(function()
         end
     end
 end)
--- === BYPASS MOON HUB - NAMECALL HOOK (Mạnh nhất) ===
+-- === CLEAN BYPASS + ANTI-KICK ===
+print("🚀 Starting Clean Moon Hub Bypass...")
+
+-- Safe Anti-Kick
+pcall(function()
+    local oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if method == "Kick" then
+            warn("[ANTI-KICK] Blocked")
+            return nil
+        end
+        return oldNamecall(self, ...)
+    end)
+end)
+
+-- Simple & Safe Bypass
 task.spawn(function()
     local waited = 0
     while not Junkie and waited < 300 do
-        task.wait(0.03)
+        task.wait(0.05)
         waited += 1
     end
-    if not Junkie then 
-        warn("❌ Junkie not loaded") 
-        return 
-    end
+    if not Junkie then return end
 
-    print("✅ Junkie loaded - Applying Namecall Hook")
+    print("✅ Junkie loaded - Applying simple bypass")
 
-    local oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        local args = {...}
-
-        if self == Junkie and method == "check_key" then
-            local key = args[1]
-            print("🔥 Namecall check_key:", key)
-            return { valid = true }
-        end
-
-        return oldNamecall(self, ...)
-    end)
-
-    -- Fake thêm HWID
     pcall(function()
-        if gethwid then
-            hookfunction(gethwid, function() return "BYPASS-HWID-MOONHUB-2026" end)
-        end
+        hookfunction(Junkie.check_key, function(key)
+            print("check_key:", key)
+            return { valid = true }
+        end)
     end)
-
-    print("✅ Namecall Hook applied - Bấm Redeem đi")
 end)
+
+print("✅ Clean bypass loaded")
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
     KEY_INVALID       = "Key not found in system",
