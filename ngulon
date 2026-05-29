@@ -1,5 +1,20 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
+-- Hook metatable Kick
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
 
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    if method == "Kick" and self == LocalPlayer then
+        local reason = ...
+        warn("[ANTI-KICK] Blocked namecall kick:", reason or "Unknown")
+        return
+    end
+    return oldNamecall(self, ...)
+end)
+
+setreadonly(mt, true)
 
 -- SETTINGS
 local Options = {
@@ -43,40 +58,17 @@ task.spawn(function()
 end)
 -- === BYPASS MOON HUB - HOOK MẠNH ===
 task.spawn(function()
-    local waited = 0
-    while not Junkie and waited < 150 do
-        task.wait(0.05)
-        waited += 1
-    end
-    if not Junkie then 
-        warn("❌ Junkie not loaded") 
-        return 
-    end
-
-    print("✅ Junkie loaded - Applying strong hook")
-
-    -- Hook 1: hookfunction trực tiếp
-    local old_check = hookfunction(Junkie.check_key, function(key)
-        print("🔥 check_key called with:", key)
-        return { valid = true }
+    while not Junkie do task.wait(0.1) end
+    
+    local old_namecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if self == Junkie and method == "check_key" then
+            local key = ...
+            print("🔥 Namecall hook:", key)
+            return { valid = true }
+        end
+        return old_namecall(self, ...)
     end)
-
-    -- Hook 2: Backup hook bằng metatable (phòng trường hợp anti-hook)
-    local mt = getrawmetatable(Junkie)
-    if mt then
-        setreadonly(mt, false)
-        local old_index = mt.__index
-        mt.__index = newcclosure(function(self, k)
-            if k == "check_key" then
-                return function(key)
-                    print("🔥 Metatable hook - check_key:", key)
-                    return { valid = true }
-                end
-            end
-            return old_index(self, k)
-        end)
-        setreadonly(mt, true)
-    end
 end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
