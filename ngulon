@@ -27,10 +27,6 @@ pcall(function()
     end)
 end)
 
--- Method 3: Backup protection
-LocalPlayer.Kick = function(...) 
-    warn("[ANTI-KICK] Direct Kick call blocked") 
-end
 
 print("✅ Anti-Kick loaded successfully")
 
