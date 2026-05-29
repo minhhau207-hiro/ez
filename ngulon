@@ -5,13 +5,7 @@ print("✅ Loading Safe Anti-Kick...")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Hookfunction Kick
-pcall(function()
-    hookfunction(LocalPlayer.Kick, function(self, reason)
-        warn("[ANTI-KICK] Blocked:", reason or "No reason")
-        return nil
-    end)
-end)
+
 
 -- Hookmetamethod Namecall
 pcall(function()
@@ -26,16 +20,6 @@ pcall(function()
     end)
 end)
 
--- Backup protections
-pcall(function()
-    LocalPlayer.Kick = function(...) 
-        warn("[ANTI-KICK] Direct call blocked") 
-    end
-end)
-
-pcall(function()
-    game:GetService("StarterGui"):SetCore("ResetButtonCallback", false)
-end)
 
 pcall(function()
     for _, conn in pairs(getconnections(LocalPlayer.AncestryChanged)) do
