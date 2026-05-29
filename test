@@ -49,31 +49,7 @@ task.spawn(function()
         end
     end
 end)
--- === MINIMAL BYPASS (Giảm conflict tối đa) ===
-task.spawn(function()
-    local waited = 0
-    while not Junkie and waited < 400 do
-        task.wait(0.05)
-        waited += 1
-    end
-    if not Junkie then 
-        print("❌ Junkie not loaded")
-        return 
-    end
 
-    print("✅ Junkie loaded - Minimal hook")
-
-    -- Chỉ hookfunction đơn giản nhất
-    pcall(function()
-        local old = Junkie.check_key
-        Junkie.check_key = function(key)
-            print("check_key called:", key)
-            return { valid = true }
-        end
-    end)
-
-    print("✅ Minimal bypass applied - Nhấn Redeem")
-end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
     KEY_INVALID       = "Key not found in system",
