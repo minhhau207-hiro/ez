@@ -50,16 +50,7 @@ task.spawn(function()
         end
     end
 end)
--- === HOOK KEYLESS & CHECK_KEY (Thêm vào đây) ===
-    local old_check_key = hookfunction(Junkie.check_key, function(key)
-        print("check_key called with key:", key)
-        
-        if key == "KEYLESS" then
-            return { valid = true }
-        end
-        
-        return old_check_key(key)  -- Gọi hàm gốc cho key thật
-    end)
+
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
     KEY_INVALID       = "Key not found in system",
