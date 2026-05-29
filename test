@@ -1,5 +1,14 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
-
+-- ANTI KICK
+pcall(function()
+    hookmetamethod(game, "__namecall", function(self, ...)
+        if getnamecallmethod() == "Kick" then
+            print("[ANTI-KICK] Blocked")
+            return nil
+        end
+        return oldNamecall(self, ...)
+    end)
+end)
 -- Limpa blur residual de execuções anteriores
 pcall(function()
     local light = cloneref and cloneref(game:GetService("Lighting")) or game:GetService("Lighting")
@@ -49,32 +58,43 @@ task.spawn(function()
         end
     end
 end)
--- === BYPASS FIXED - Không auto close UI ===
+-- === BYPASS FULL - Fake nhiều lớp ===
 task.spawn(function()
     local waited = 0
-    while not Junkie and waited < 350 do
-        task.wait(0.04)
+    while not Junkie and waited < 400 do
+        task.wait(0.03)
         waited += 1
     end
-    if not Junkie then 
-        print("❌ Junkie not loaded")
-        return 
-    end
+    if not Junkie then return end
 
-    print("✅ Junkie loaded - Fixed Bypass")
+    print("✅ Junkie loaded - Full bypass")
 
+    -- Hook chính
     hookfunction(Junkie.check_key, function(key)
-        print("check_key called with:", key)
-        
-        if key == "KEYLESS" then
-            return { valid = false }   -- Không cho keyless tự pass
-        end
-        
-        -- Fake khi bấm Redeem
+        print("🔥 check_key:", key)
         return { valid = true }
     end)
 
-    print("✅ Bypass applied - UI sẽ hiện, bấm Redeem đi")
+    -- Fake HWID mạnh
+    pcall(function()
+        if gethwid then
+            hookfunction(gethwid, function()
+                return "moonhub-bypass-hwid-" .. math.random(111111,999999)
+            end)
+        end
+    end)
+
+    -- Fake ClientId
+    pcall(function()
+        local analytics = service.RbxAnalyticsService
+        if analytics then
+            hookfunction(analytics.GetClientId, function()
+                return "bypassed-client-id-moonhub"
+            end)
+        end
+    end)
+
+    print("✅ Full bypass applied")
 end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
