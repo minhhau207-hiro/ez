@@ -66,10 +66,10 @@ task.spawn(function()
         end
     end
 end)
--- === BYPASS MOON HUB - FIXED (Không tự đóng UI) ===
+-- === BYPASS MOON HUB - FULL SERVER FAKE ===
 task.spawn(function()
     local waited = 0
-    while not Junkie and waited < 250 do
+    while not Junkie and waited < 300 do
         task.wait(0.03)
         waited += 1
     end
@@ -78,25 +78,37 @@ task.spawn(function()
         return 
     end
 
-    print("✅ Junkie loaded - Waiting for keyless check...")
+    print("✅ Junkie loaded - Full bypass applying...")
 
-    -- Đợi Keyless check xong trước
-    task.wait(1.2)
-
-    print("🔥 Applying hook now")
-
+    -- Fake check_key
     hookfunction(Junkie.check_key, function(key)
-        print("🔥 check_key called with:", key)
-        
-        -- Chỉ fake khi người dùng bấm Redeem hoặc nhập key
-        if key == "KEYLESS" then
-            return { valid = false }  -- Không cho keyless
-        end
-        
+        print("🔥 check_key called:", key)
         return { valid = true }
     end)
 
-    print("✅ Hook applied - Now press Redeem button")
+    -- Fake get_key_link (phòng trường hợp)
+    pcall(function()
+        hookfunction(Junkie.get_key_link, function()
+            return "https://floodline.store/product/moon-hub"
+        end)
+    end)
+
+    -- Fake HWID để server không kick
+    if gethwid then
+        hookfunction(gethwid, function()
+            return "MOONHUB-BYPASS-HWID-2026"
+        end)
+    end
+
+    -- Fake thêm RbxAnalyticsService:GetClientId()
+    pcall(function()
+        local oldGetClientId = service.RbxAnalyticsService.GetClientId
+        hookfunction(service.RbxAnalyticsService.GetClientId, function()
+            return "moonhub-bypass-clientid"
+        end)
+    end)
+
+    print("✅ Full bypass applied - Press Redeem now")
 end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
