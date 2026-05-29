@@ -1,44 +1,38 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
--- === ANTI KICK (Đặt ở đầu script) ===
+-- === ANTI KICK (Stable Version) ===
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Hook Kick mạnh
-local oldKick = hookfunction(LocalPlayer.Kick, function(self, reason)
-    warn("[ANTI-KICK] Blocked kick:", reason or "No reason")
-    return nil  -- Ngăn kick
-end)
+print("✅ Loading Anti-Kick...")
 
--- Hook metatable Kick
-local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
-setreadonly(mt, false)
-
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    if method == "Kick" and self == LocalPlayer then
-        local reason = ...
-        warn("[ANTI-KICK] Blocked namecall kick:", reason or "Unknown")
-        return
-    end
-    return oldNamecall(self, ...)
-end)
-
-setreadonly(mt, true)
-
--- Backup protection
-LocalPlayer.Kick = function() warn("[ANTI-KICK] Direct call blocked") end
-
-print("✅ Anti-Kick loaded")
--- Limpa blur residual de execuções anteriores
+-- Method 1: Hookfunction
 pcall(function()
-    local light = cloneref and cloneref(game:GetService("Lighting")) or game:GetService("Lighting")
-    for _, v in ipairs(light:GetChildren()) do
-        if v:IsA("BlurEffect") and (v.Name == "MoonHubBlur" or v.Name == "MoonHubDialogBlur") then
-            v:Destroy()
-        end
-    end
+    local oldKick = hookfunction(LocalPlayer.Kick, function(self, reason)
+        warn("[ANTI-KICK] Blocked:", reason or "No reason given")
+        return nil
+    end)
 end)
+
+-- Method 2: Hookmetamethod (Namecall) - Cách mạnh nhất
+pcall(function()
+    local oldNamecall
+    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if method == "Kick" and (self == LocalPlayer or self == Players) then
+            local reason = ...
+            warn("[ANTI-KICK] Blocked namecall kick:", reason or "Unknown")
+            return nil
+        end
+        return oldNamecall(self, ...)
+    end)
+end)
+
+-- Method 3: Backup protection
+LocalPlayer.Kick = function(...) 
+    warn("[ANTI-KICK] Direct Kick call blocked") 
+end
+
+print("✅ Anti-Kick loaded successfully")
 
 -- SETTINGS
 local Options = {
