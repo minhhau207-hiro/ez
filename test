@@ -1,5 +1,15 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
-
+pcall(function()
+    local oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if method == "Kick" and (self == LocalPlayer or self == Players) then
+            local reason = ...
+            warn("[ANTI-KICK] Blocked namecall:", reason or "Unknown")
+            return nil
+        end
+        return oldNamecall(self, ...)
+    end)
+end)
 -- Limpa blur residual de execuções anteriores
 pcall(function()
     local light = cloneref and cloneref(game:GetService("Lighting")) or game:GetService("Lighting")
@@ -49,7 +59,39 @@ task.spawn(function()
         end
     end
 end)
+-- === MINIMAL BYPASS (Ít conflict nhất) ===
+task.spawn(function()
+    local waited = 0
+    while not Junkie and waited < 350 do
+        task.wait(0.04)
+        waited += 1
+    end
+    if not Junkie then 
+        print("❌ Junkie not loaded")
+        return 
+    end
 
+    print("✅ Junkie loaded - Minimal bypass")
+
+    -- Chỉ hookfunction đơn giản
+    pcall(function()
+        hookfunction(Junkie.check_key, function(key)
+            print("check_key called:", key)
+            return { valid = true }
+        end)
+    end)
+
+    -- Fake HWID nhẹ
+    pcall(function()
+        if gethwid then
+            hookfunction(gethwid, function()
+                return "BYPASSED-HWID-" .. math.random(100000,999999)
+            end)
+        end
+    end)
+
+    print("✅ Minimal bypass applied")
+end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
     KEY_INVALID       = "Key not found in system",
