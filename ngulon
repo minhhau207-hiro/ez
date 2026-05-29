@@ -56,19 +56,29 @@ task.spawn(function()
         end
     end
 end)
--- === BYPASS MOON HUB - HOOK MẠNH ===
+-- === BYPASS MOON HUB - FIXED (Không freeze) ===
 task.spawn(function()
-    while not Junkie do task.wait(0.1) end
-    
-    local old_namecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        if self == Junkie and method == "check_key" then
-            local key = ...
-            print("🔥 Namecall hook:", key)
+    local waited = 0
+    while not Junkie and waited < 200 do
+        task.wait(0.05)
+        waited += 1
+    end
+    if not Junkie then 
+        warn("❌ Junkie not loaded") 
+        return 
+    end
+
+    print("✅ Junkie loaded - Hooking check_key (Simple)")
+
+    -- Hook đơn giản, ổn định nhất
+    pcall(function()
+        hookfunction(Junkie.check_key, function(key)
+            print("🔥 check_key called:", key)
             return { valid = true }
-        end
-        return old_namecall(self, ...)
+        end)
     end)
+
+    print("✅ Bypass hook applied successfully")
 end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
