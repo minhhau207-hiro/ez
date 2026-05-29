@@ -1,34 +1,5 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
--- === ANTI KICK (Stable Version) ===
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 
-print("✅ Loading Anti-Kick...")
-
--- Method 1: Hookfunction
-pcall(function()
-    local oldKick = hookfunction(LocalPlayer.Kick, function(self, reason)
-        warn("[ANTI-KICK] Blocked:", reason or "No reason given")
-        return nil
-    end)
-end)
-
--- Method 2: Hookmetamethod (Namecall) - Cách mạnh nhất
-pcall(function()
-    local oldNamecall
-    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        if method == "Kick" and (self == LocalPlayer or self == Players) then
-            local reason = ...
-            warn("[ANTI-KICK] Blocked namecall kick:", reason or "Unknown")
-            return nil
-        end
-        return oldNamecall(self, ...)
-    end)
-end)
-
-
-print("✅ Anti-Kick loaded successfully")
 
 -- SETTINGS
 local Options = {
