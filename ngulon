@@ -50,16 +50,43 @@ task.spawn(function()
         end
     end
 end)
--- === HOOK KEYLESS & CHECK_KEY (Thêm vào đây) ===
-    local old_check_key = hookfunction(Junkie.check_key, function(key)
-        print("check_key called with key:", key)
-        
-        if key == "KEYLESS" then
-            return { valid = true }
-        end
-        
-        return old_check_key(key)  -- Gọi hàm gốc cho key thật
+-- === BYPASS MOON HUB - HOOK MẠNH ===
+task.spawn(function()
+    local waited = 0
+    while not Junkie and waited < 150 do
+        task.wait(0.05)
+        waited += 1
+    end
+    if not Junkie then 
+        warn("❌ Junkie not loaded") 
+        return 
+    end
+
+    print("✅ Junkie loaded - Applying strong hook")
+
+    -- Hook 1: hookfunction trực tiếp
+    local old_check = hookfunction(Junkie.check_key, function(key)
+        print("🔥 check_key called with:", key)
+        return { valid = true }
     end)
+
+    -- Hook 2: Backup hook bằng metatable (phòng trường hợp anti-hook)
+    local mt = getrawmetatable(Junkie)
+    if mt then
+        setreadonly(mt, false)
+        local old_index = mt.__index
+        mt.__index = newcclosure(function(self, k)
+            if k == "check_key" then
+                return function(key)
+                    print("🔥 Metatable hook - check_key:", key)
+                    return { valid = true }
+                end
+            end
+            return old_index(self, k)
+        end)
+        setreadonly(mt, true)
+    end
+end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
     KEY_INVALID       = "Key not found in system",
