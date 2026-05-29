@@ -38,7 +38,6 @@ local LaunchJunkie = {
 -- ─── JUNKIE SDK ──────────────────────────────────────────────────────────────
 local Junkie = nil
 task.spawn(function()
-    
     local ok, sdk = pcall(loadstring, game:HttpGet("https://jnkie.com/sdk/library.lua"))
     if ok and sdk then
         local ok2, lib = pcall(sdk)
