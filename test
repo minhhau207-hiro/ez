@@ -58,43 +58,34 @@ task.spawn(function()
         end
     end
 end)
--- === BYPASS FULL - Fake nhiều lớp ===
+-- === MINIMAL + DELAY BYPASS ===
 task.spawn(function()
+    task.wait(1.5)  -- Đợi game load ổn định
+
     local waited = 0
-    while not Junkie and waited < 400 do
-        task.wait(0.03)
+    while not Junkie and waited < 500 do
+        task.wait(0.05)
         waited += 1
     end
-    if not Junkie then return end
+    if not Junkie then 
+        print("❌ Junkie not loaded")
+        return 
+    end
 
-    print("✅ Junkie loaded - Full bypass")
+    print("✅ Junkie loaded - Applying minimal bypass")
 
-    -- Hook chính
-    hookfunction(Junkie.check_key, function(key)
-        print("🔥 check_key:", key)
-        return { valid = true }
-    end)
-
-    -- Fake HWID mạnh
+    -- Hook siêu nhẹ
     pcall(function()
-        if gethwid then
-            hookfunction(gethwid, function()
-                return "moonhub-bypass-hwid-" .. math.random(111111,999999)
-            end)
-        end
+        hookfunction(Junkie.check_key, function(key)
+            print("check_key called:", key)
+            if key == "KEYLESS" then
+                return { valid = false }
+            end
+            return { valid = true }
+        end)
     end)
 
-    -- Fake ClientId
-    pcall(function()
-        local analytics = service.RbxAnalyticsService
-        if analytics then
-            hookfunction(analytics.GetClientId, function()
-                return "bypassed-client-id-moonhub"
-            end)
-        end
-    end)
-
-    print("✅ Full bypass applied")
+    print("✅ Minimal bypass applied - Chờ UI hiện")
 end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
