@@ -1,57 +1,15 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
-if not game:IsLoaded() then game.Loaded:Wait() end
 
--- === CLEAN BYPASS + ANTI-KICK + LOGGER ===
-local LogFile = "MoonHub_Log.txt"
-
-local function Log(text)
-    pcall(function()
-        appendfile(LogFile, "[" .. os.date("%H:%M:%S") .. "] " .. text .. "\n")
-    end)
-end
-
-print("🚀 Starting Clean Moon Hub Loader...")
-Log("Script started")
-
--- Safe Anti-Kick
+-- Limpa blur residual de execuções anteriores
 pcall(function()
-    local old = hookmetamethod(game, "__namecall", function(self, ...)
-        if getnamecallmethod() == "Kick" then
-            Log("[ANTI-KICK] Blocked kick")
-            return nil
+    local light = cloneref and cloneref(game:GetService("Lighting")) or game:GetService("Lighting")
+    for _, v in ipairs(light:GetChildren()) do
+        if v:IsA("BlurEffect") and (v.Name == "MoonHubBlur" or v.Name == "MoonHubDialogBlur") then
+            v:Destroy()
         end
-        return old(self, ...)
-    end)
+    end
 end)
 
-Log("Anti-Kick loaded")
-
--- Simple Bypass
-task.spawn(function()
-    local waited = 0
-    while not Junkie and waited < 400 do
-        task.wait(0.05)
-        waited += 1
-    end
-    if not Junkie then 
-        Log("❌ Junkie failed to load")
-        return 
-    end
-
-    Log("✅ Junkie loaded - Applying bypass")
-
-    pcall(function()
-        hookfunction(Junkie.check_key, function(key)
-            Log("check_key called: " .. tostring(key))
-            return { valid = true }
-        end)
-    end)
-
-    Log("✅ Bypass applied successfully")
-    print("✅ Bypass applied - Try pressing Redeem if UI appears")
-end)
-
-Log("Loader finished")
 -- SETTINGS
 local Options = {
     Draggable      = true,
@@ -80,7 +38,6 @@ local LaunchJunkie = {
 -- ─── JUNKIE SDK ──────────────────────────────────────────────────────────────
 local Junkie = nil
 task.spawn(function()
-    
     local ok, sdk = pcall(loadstring, game:HttpGet("https://jnkie.com/sdk/library.lua"))
     if ok and sdk then
         local ok2, lib = pcall(sdk)
@@ -92,7 +49,42 @@ task.spawn(function()
         end
     end
 end)
+-- === BYPASS MOON HUB - NAMECALL HOOK (Mạnh nhất) ===
+task.spawn(function()
+    local waited = 0
+    while not Junkie and waited < 300 do
+        task.wait(0.03)
+        waited += 1
+    end
+    if not Junkie then 
+        warn("❌ Junkie not loaded") 
+        return 
+    end
 
+    print("✅ Junkie loaded - Applying Namecall Hook")
+
+    local oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
+
+        if self == Junkie and method == "check_key" then
+            local key = args[1]
+            print("🔥 Namecall check_key:", key)
+            return { valid = true }
+        end
+
+        return oldNamecall(self, ...)
+    end)
+
+    -- Fake thêm HWID
+    pcall(function()
+        if gethwid then
+            hookfunction(gethwid, function() return "BYPASS-HWID-MOONHUB-2026" end)
+        end
+    end)
+
+    print("✅ Namecall Hook applied - Bấm Redeem đi")
+end)
 -- ─── ERROR CODE MAP (Arqel-style) ────────────────────────────────────────────
 local ERROR_MESSAGES = {
     KEY_INVALID       = "Key not found in system",
