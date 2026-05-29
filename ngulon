@@ -1,5 +1,60 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
+-- === CONSOLE LOGGER ===
+local filename = "LogMoonHub.txt"
 
+print("📝 Console Logger Started - Logging to:", filename)
+
+-- Lưu function cũ
+local old_print = print
+local old_warn = warn
+local old_error = error
+
+local function logToFile(text)
+    pcall(function()
+        appendfile(filename, text .. "\n")
+    end)
+end
+
+-- Hook print
+print = function(...)
+    local args = {...}
+    local str = ""
+    for i, v in ipairs(args) do
+        str = str .. tostring(v) .. " "
+    end
+    old_print(...)
+    pcall(function() logToFile("[PRINT] " .. str) end)
+end
+
+-- Hook warn
+warn = function(...)
+    local args = {...}
+    local str = ""
+    for i, v in ipairs(args) do
+        str = str .. tostring(v) .. " "
+    end
+    old_warn(...)
+    pcall(function() logToFile("[WARN] " .. str) end)
+end
+
+-- Hook error
+error = function(msg)
+    old_error(msg)
+    pcall(function() logToFile("[ERROR] " .. tostring(msg)) end)
+end
+
+-- Log thêm một số event quan trọng
+print("Logger initialized successfully!")
+appendfile(filename, "=== Moon Hub Log Started at " .. os.date("%Y-%m-%d %H:%M:%S") .. " ===\n")
+
+-- Tự động log một số thông tin hệ thống
+task.spawn(function()
+    task.wait(2)
+    pcall(function()
+        appendfile(filename, "[SYSTEM] Executor: " .. (identifyexecutor and identifyexecutor() or "Unknown") .. "\n")
+        appendfile(filename, "[SYSTEM] HWID: " .. tostring(GetHWID and GetHWID() or "N/A") .. "\n")
+    end)
+end)
 -- SETTINGS
 local Options = {
     Draggable      = true,
